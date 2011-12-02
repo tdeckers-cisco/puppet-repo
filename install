@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Bootstrap for puppet configuration.
+#
+# This script will require root/sudo
+# 
+# 1. install puppet, git
+# 2. pull from repo
+# 3. replace /etc/puppet
+# 4. puppet run
+#
+
+ETC_DIR=/tmp/puppet
+TEMP_TAR=/tmp/master.tar.gz
+
+sudo yum -y install puppet git
+wget --no-check-certificate -O $TEMP_TAR https://github.com/tdeckers-cisco/puppet-repo/tarball/master
+cd /tmp
+mkdir $ETC_DIR
+tar -xzvf $TEMP_TAR
+mv tdeckers-cisco-puppet-repo*/* $ETC_DIR
+
+# clean up
+rm $TEMP_TAR
+rm -rf /tmp/tdeckers-cisco-puppet-repo*
+
