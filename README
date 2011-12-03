@@ -1,0 +1,10 @@
+
+Requires:
+* curl: sudo yum install curl
+
+Bootstrap process:
+
+$ bash < <(curl -s https://github.com/tdeckers-cisco/puppet-repo/blob/master/install)
+(note: this will require root/sudo)
+
+
