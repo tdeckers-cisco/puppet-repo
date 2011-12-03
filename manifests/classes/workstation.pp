@@ -42,6 +42,7 @@ class workstation {
 
 	ssh_authorized_key { $user:
   		ensure => present,
+		# TODO change this into a variable
   		key => "AAAAB3NzaC1yc2EAAAABJQAAAIBwyfdPUaRNjeoCZmyo/xPeVKevpXRbikmA0KaLRJwp2daI/LL/SGsHBqgeNzrnauALVPUAMh6wx2xgpLOWzLugIykq5vuIgDpcK/jrKfvwMC7O7mh915LqzutKVq9cUFEiXRhTsGOxZEQiwaG0ILLnvyEkxtQwCp7ujviNNSih2w==",
   		name => "$user key",
 # 		target => "/home/$user/.ssh/authorized_keys",
@@ -50,7 +51,8 @@ class workstation {
 	}
 
 	file { "/etc/ssh/sshd_config":
-		source => "files/sshd_config"
+		source => "files/sshd_config",
+		mode => 600
 	}
 }
 

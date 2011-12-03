@@ -9,18 +9,32 @@
 # 3. replace /etc/puppet
 # 4. puppet run
 #
+# TODO
+# * install cron?
 
-ETC_DIR=/tmp/puppet
+ETC_DIR=/etc/puppet
 TEMP_TAR=/tmp/master.tar.gz
 
+echo "####  Installing puppet, git"
 sudo yum -y install puppet git
+
+echo "####  Pulling from repo"
 wget --no-check-certificate -O $TEMP_TAR https://github.com/tdeckers-cisco/puppet-repo/tarball/master
 cd /tmp
-mkdir $ETC_DIR
+if [ ! -d $ETC_DIR ]
+then
+  mkdir $ETC_DIR
+fi
 tar -xzvf $TEMP_TAR
-mv tdeckers-cisco-puppet-repo*/* $ETC_DIR
 
-# clean up
+echo "####  Replacing $ETC_DIR"
+sudo rm -rf $ETC_DIR/*
+sudo mv tdeckers-cisco-puppet-repo*/* $ETC_DIR
+
+echo "####  Cleaning up after myself"
 rm $TEMP_TAR
 rm -rf /tmp/tdeckers-cisco-puppet-repo*
 
+echo "####  Running puppet"
+cd $ETC_DIR
+sudo puppet -v $ETC_DIR/manifests/init.pp
