@@ -13,7 +13,6 @@
 # * install cron?
 
 ETC_DIR=/etc/puppet
-TEMP_TAR=/tmp/master.tar.gz
 
 echo "####  Installing puppet, git"
 sudo yum -y install puppet git
@@ -32,30 +31,29 @@ if [ ! -e ~/.keyinstalled ]; then
   echo
   pubkey=`cat ~/.ssh/id_rsa.pub`
   title="`whoami`@`hostname`"
-  data="{title:$title, key=pubkey}"
-  http_code=`curl -s -w %{http_code} -u $username:$password -o /tmp/curl.log https://api.github.com/user/keys -X POST -d $data`
+  data="{\"title\":\"$title\", \"key\":\"$pubkey\"}"
+  echo $data
+  http_code=`curl -s -w %{http_code} -u $username:$password -o /tmp/curl.log https://api.github.com/user/keys -X POST -d "$data"`
   if [ $http_code = "401" ]; then
     echo -e "\nUnauthorized!"
     exit
   fi
-  touch ~/.keyinstalled # persist success
+  echo "http code: $http_code"
+  if [ $http_code = "201" ]; then
+    echo -e "\nSuccessfully added new SSH key to Github.com"
+    touch ~/.keyinstalled # persist success
+  fi
 fi
  
 echo "####  Pulling from repo"
-wget --no-check-certificate -O $TEMP_TAR https://github.com/tdeckers-cisco/puppet-repo/tarball/master
 cd /tmp
-if [ ! -d $ETC_DIR ]
-then
-  mkdir $ETC_DIR
-fi
-tar -xzvf $TEMP_TAR
+git clone git@github.com:tdeckers-cisco/puppet-repo.git
 
 echo "####  Replacing $ETC_DIR"
 sudo rm -rf $ETC_DIR/*
 sudo mv tdeckers-cisco-puppet-repo*/* $ETC_DIR
 
 echo "####  Cleaning up after myself"
-rm $TEMP_TAR
 rm -rf /tmp/tdeckers-cisco-puppet-repo*
 
 echo "####  Running puppet"
