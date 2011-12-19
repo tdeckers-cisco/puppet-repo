@@ -18,6 +18,29 @@ TEMP_TAR=/tmp/master.tar.gz
 echo "####  Installing puppet, git"
 sudo yum -y install puppet git
 
+echo "#### Installing SSH key at github (if needed)"
+if [ ! -e ~/.keyinstalled ]; then
+  if [ ! -e ~/.ssh/id_rsa ]; then
+    echo "#### Installing new RSA key"
+    ssh-keygen -q -f ~/.ssh/id_rsa -N ""
+  fi
+  echo "#### Registering our key at Github.com"
+  echo -n "Enter your github.com username and press [ENTER]: "
+  read username
+  echo -n "Enter your github.com password and press [ENTER]: "
+  read -s password
+  echo
+  pubkey=`cat ~/.ssh/id_rsa.pub`
+  title="`whoami`@`hostname`"
+  data="{title:$title, key=pubkey}"
+  http_code=`curl -s -w %{http_code} -u $username:$password -o /tmp/curl.log https://api.github.com/user/keys -X POST -d $data`
+  if [ $http_code = "401" ]; then
+    echo -e "\nUnauthorized!"
+    exit
+  fi
+  touch ~/.keyinstalled # persist success
+fi
+ 
 echo "####  Pulling from repo"
 wget --no-check-certificate -O $TEMP_TAR https://github.com/tdeckers-cisco/puppet-repo/tarball/master
 cd /tmp
